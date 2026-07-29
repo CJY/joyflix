@@ -121,7 +121,7 @@ export const UserMenu: React.FC<{ className?: string }> = ({ className }) => {
   const [doubanProxyUrl, setDoubanProxyUrl] = useState('');
   const [enableOptimization, setEnableOptimization] = useState(true);
   const [doubanDataSource, setDoubanDataSource] = useState('direct');
-  const [doubanImageProxyType, setDoubanImageProxyType] = useState('direct');
+  const [doubanImageProxyType, setDoubanImageProxyType] = useState('cmliussss-cdn-ali');
   const [doubanImageProxyUrl, setDoubanImageProxyUrl] = useState('');
 
 
