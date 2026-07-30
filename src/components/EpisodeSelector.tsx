@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import React, {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -171,6 +172,18 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
     fetchVideoInfosInBatches();
   }, [activeTab, availableSources, getVideoInfo, optimizationEnabled]);
 
+  const EPISODES_PER_PAGE = 250;
+  const pageCount = Math.ceil(totalEpisodes / EPISODES_PER_PAGE);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const pageLabels = useMemo(() => {
+    return Array.from({ length: pageCount }, (_, i) => {
+      const start = i * EPISODES_PER_PAGE + 1;
+      const end = Math.min(start + EPISODES_PER_PAGE - 1, totalEpisodes);
+      return `${start}-${end}`;
+    });
+  }, [pageCount, totalEpisodes]);
+
   const handleEpisodeClick = useCallback(
     (episodeNumber: number) => {
       onChange?.(episodeNumber);
@@ -189,8 +202,11 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
     setActiveTab('sources');
   };
 
+  const currentStart = currentPage * EPISODES_PER_PAGE + 1;
+  const currentEnd = Math.min(currentStart + EPISODES_PER_PAGE - 1, totalEpisodes);
+
   return (
-    <div className='md:ml-2 px-4 py-0 h-full rounded-xl bg-black/10 dark:bg-white/5 flex flex-col border border-white/0 dark:border-white/30 overflow-hidden'>
+    <div className='md:ml-2 px-4 py-0 min-h-0 rounded-xl bg-black/10 dark:bg-white/5 flex flex-col border border-white/0 dark:border-white/30 overflow-hidden'>
       <div className='flex mb-1 -mx-6 flex-shrink-0'>
         {totalEpisodes > 1 && (
           <div
@@ -221,41 +237,62 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
       </div>
 
       {activeTab === 'episodes' && (
-        <div className='overflow-y-auto h-full pb-4'>
-          <div className='space-y-1'>
-            {Array.from({ length: totalEpisodes }, (_, i) => i + 1).map((episodeNumber) => {
-              const isActive = episodeNumber === value;
-              const title = episodes_titles?.[episodeNumber - 1] ?? '';
-              const displayTitle = (() => {
-                if (!title) return '';
-                const match = title.match(/第(\d+)集/);
-                if (match) return '';
-                return title;
-              })();
-              return (
+        <>
+          {pageCount > 1 && (
+            <div className='flex items-center gap-2 mb-3 border-b border-gray-300 dark:border-gray-700 -mx-6 px-6 flex-shrink-0 overflow-x-auto'>
+              {pageLabels.map((label, idx) => (
                 <button
-                  key={episodeNumber}
-                  onClick={() => handleEpisodeClick(episodeNumber - 1)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-all duration-200 text-left select-none
+                  key={label}
+                  onClick={() => setCurrentPage(idx)}
+                  className={`relative py-2 text-sm font-medium whitespace-nowrap flex-shrink-0 px-3 transition-colors
                     ${
-                      isActive
-                        ? 'bg-blue-400 text-white shadow-lg shadow-blue-400/25'
-                        : 'bg-gray-200/70 text-gray-700 hover:bg-gray-300 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20'
-                    }`.trim()}
+                      idx === currentPage
+                        ? 'text-blue-400 dark:text-blue-300'
+                        : 'text-gray-700 hover:text-blue-400 dark:text-gray-300 dark:hover:text-blue-300'
+                    }
+                  `.trim()}
                 >
-                  <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-md text-xs font-bold
-                    ${isActive ? 'bg-white/20' : 'bg-gray-300 dark:bg-white/20'}
-                  `}>
-                    {episodeNumber}
-                  </span>
-                  {displayTitle && (
-                    <span className='truncate'>{displayTitle}</span>
+                  {label}
+                  {idx === currentPage && (
+                    <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400 dark:bg-blue-300' />
                   )}
                 </button>
-              );
-            })}
+              ))}
+            </div>
+          )}
+
+          <div className='pb-4'>
+            <div className='grid grid-cols-5 gap-2'>
+              {Array.from({ length: currentEnd - currentStart + 1 }, (_, i) => currentStart + i).map((episodeNumber) => {
+                const isActive = episodeNumber === value;
+                const title = episodes_titles?.[episodeNumber - 1] ?? '';
+                const displayTitle = (() => {
+                  if (!title) return '';
+                  const match = title.match(/第(\d+)集/);
+                  if (match) return '';
+                  return title;
+                })();
+                return (
+                  <button
+                    key={episodeNumber}
+                    onClick={() => handleEpisodeClick(episodeNumber - 1)}
+                    className={`flex flex-col items-center justify-center px-1 py-2 text-xs rounded-lg transition-all duration-200 select-none min-h-[48px]
+                      ${
+                        isActive
+                          ? 'bg-blue-400 text-white shadow-lg shadow-blue-400/25'
+                          : 'bg-gray-200/70 text-gray-700 hover:bg-gray-300 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20'
+                      }`.trim()}
+                  >
+                    <span className='font-bold leading-tight'>{episodeNumber}</span>
+                    {displayTitle && (
+                      <span className='truncate w-full text-center leading-tight mt-0.5 opacity-80'>{displayTitle}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {activeTab === 'sources' && (
