@@ -2458,7 +2458,7 @@ function PlayPageClient() {
 
             {/* 集数和路线 */}
             <div
-              className={`relative h-[300px] lg:h-full md:overflow-hidden transition-all duration-300 ease-in-out md:col-span-1 lg:opacity-100 lg:scale-100`}
+              className={`relative md:overflow-hidden transition-all duration-300 ease-in-out md:col-span-1 lg:opacity-100 lg:scale-100`}
             >
               <EpisodeSelector
                 totalEpisodes={totalEpisodes}
