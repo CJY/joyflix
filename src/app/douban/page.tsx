@@ -126,7 +126,7 @@ function DoubanPageClient() {
       }
     } else {
       if (type === 'movie') { setPrimarySelection('热门'); setSecondarySelection('全部'); }
-      else if (type === 'tv') { setPrimarySelection(''); setSecondarySelection('tv'); }
+      else if (type === 'tv') { setPrimarySelection(''); setSecondarySelection('tv_domestic'); }
       else if (type === 'show') { setPrimarySelection(''); setSecondarySelection('show'); }
       else if (type === 'anime') { setPrimarySelection('每日放送'); setSecondarySelection('全部'); }
       else { setPrimarySelection(''); setSecondarySelection('全部'); }
